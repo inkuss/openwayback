@@ -15,10 +15,10 @@
     <property name="properties">
       <value>
         <!-- Customize these basic placeholders. -->
-        wayback.basedir.default=/tmp/openwayback
+        wayback.basedir.default=/opt/regal/openwayback-data/openwayback
         wayback.url.scheme.default=http
-        wayback.url.host.default=localhost
-        wayback.url.port.default=8080
+        wayback.url.host.default=edoweb-test.hbz-nrw.de
+        wayback.url.port.default=9080
 
         <!-- Environment variables (if present) override defaults. No need to customize these. -->
         wayback.basedir=#{ systemEnvironment['WAYBACK_BASEDIR'] ?: '${wayback.basedir.default}' }
@@ -28,44 +28,24 @@
 
         <!-- No need to edit this setting unless deploying in a non-ROOT context
              or using a load balancer, in which case configure it with the frontend URL prefix. -->
-        wayback.url.prefix.default=${wayback.url.scheme}://${wayback.url.host}:${wayback.url.port}
+        <!--wayback.url.prefix.default=${wayback.url.scheme}://${wayback.url.host}:${wayback.url.port}
+-->
+	wayback.url.prefix.default=https://api.edoweb-test.hbz-nrw.de
 
         <!-- Environment variable (if present) overrides default. No need to customize this. -->
         wayback.url.prefix=#{ systemEnvironment['WAYBACK_URL_PREFIX'] ?: '${wayback.url.prefix.default}' }
 
         <!-- Customize or add additional placeholders if needed to use elsewhere.
              Check BDBCollection.xml for following placeholders being used. -->
-        wayback.archivedir.1=${wayback.basedir}/files1/
-        wayback.archivedir.2=${wayback.basedir}/files2/
+        wayback.archivedir.1=/opt/regal/heritrix-data/
+        wayback.archivedir.2=/opt/regal/wpull-data/
+        wayback.archivedir.3=/opt/regal/wget-data/
+        wayback.archivedir.4=${wayback.basedir}/files2/
       </value>
     </property>
   </bean>
 
-  <bean id="waybackCanonicalizer" class="org.archive.wayback.util.url.AggressiveUrlCanonicalizer">
-    <!-- some specific canonicalization rules to apply to URLS matching a particular pattern -->
-    <property name="processingRules">
-      <list>
-        <!-- Ouest France -->
-        <!--
-        <bean class="org.archive.wayback.util.url.CanonicalizationRule">
-          <property name="pattern" value="ouestfrance-enligne\.com" />
-          <property name="processors">
-            <list>
-              <bean class="org.archive.wayback.util.url.UriStripper">
-                <property name="pattern" value="(in_ses_id=[0-9]+)&amp;?" />
-              </bean>
-              <bean class="org.archive.wayback.util.url.UriTranscoder">
-                <property name="pattern" value="&amp;edi=(.+)&amp;" />
-                <property name="sourceEncoding" value="ISO-8859-1" />
-                <property name="targetEncoding" value="UTF-8" />
-              </bean>
-            </list>
-          </property>
-        </bean>
-        -->
-      </list>
-    </property>
-  </bean>
+  <bean id="waybackCanonicalizer" class="org.archive.wayback.util.url.AggressiveUrlCanonicalizer" />
 
 
 <!--
@@ -113,9 +93,10 @@
 	example implementations of WaybackCollections. To specify where your 
 	ARC/WARC files are located, see the file BDBCollection.xml.
 -->
-
   <import resource="BDBCollection.xml"/>
+
 <!--
+
   <import resource="CDXCollection.xml"/>
   <import resource="RemoteCollection.xml"/>
   <import resource="NutchCollection.xml"/>
@@ -220,11 +201,11 @@
 	<!--
     <property name="exactHostMatch" value="true" />
 	-->
-    
     <property name="collection" ref="localbdbcollection" />
-<!--
+<!--    
     <property name="collection" ref="localcdxcollection" />
 -->
+
 
     <property name="replay" ref="archivalurlreplay" />
     <property name="query">

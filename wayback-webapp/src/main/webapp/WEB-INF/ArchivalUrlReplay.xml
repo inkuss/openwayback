@@ -118,7 +118,7 @@
         <bean class="org.archive.wayback.replay.selector.RedirectSelector">
           <property name="renderer">
             <bean class="org.archive.wayback.replay.JSPReplayRenderer">
-              <property name="targetJsp" value="/WEB-INF/replay/UrlRedirectNotice.jsp" />
+              <property name="targetJsp" value="/WEB-INF/replay/UrlRedirectNoticeMinimal.jsp" />
             </bean>
           </property>
         </bean>
