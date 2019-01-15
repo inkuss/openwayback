@@ -30,17 +30,18 @@
              or using a load balancer, in which case configure it with the frontend URL prefix. -->
         <!--wayback.url.prefix.default=${wayback.url.scheme}://${wayback.url.host}:${wayback.url.port}
 -->
-	wayback.url.prefix.default=https://api.edoweb-test.hbz-nrw.de
+	wayback.url.prefix.default=https://api.${wayback.url.host.default}
 
         <!-- Environment variable (if present) overrides default. No need to customize this. -->
         wayback.url.prefix=#{ systemEnvironment['WAYBACK_URL_PREFIX'] ?: '${wayback.url.prefix.default}' }
 
         <!-- Customize or add additional placeholders if needed to use elsewhere.
              Check BDBCollection.xml for following placeholders being used. -->
-        wayback.archivedir.1=/opt/regal/heritrix-data/
-        wayback.archivedir.2=/opt/regal/wpull-data/
-        wayback.archivedir.3=/opt/regal/wget-data/
-        wayback.archivedir.4=${wayback.basedir}/files2/
+        wayback.archivedir.1=/opt/regal/wpull-data/
+        wayback.archivedir.2=/opt/regal/heritrix-data/
+        wayback.archivedir.3=/opt/regal/cdn-data/
+        wayback.archivedir.4=/opt/regal/wget-data/
+        wayback.archivedir.5=${wayback.basedir}/files2/
       </value>
     </property>
   </bean>
