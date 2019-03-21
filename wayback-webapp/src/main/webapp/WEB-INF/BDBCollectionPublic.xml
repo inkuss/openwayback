@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans-3.0.xsd"
+       default-init-method="init">
+
+<!--
+
+    This file contains a WaybackCollection implementation for an HBZ Edoweb public archive.
+
+-->
+
+<!--
+	The ResourceFileLocationDB implementation to use for mapping ARC/WARC names
+	to absolute paths/URLs via a BDBJE database.
+-->
+  <bean id="publicresourcefilelocationdb" class="org.archive.wayback.resourcestore.locationdb.BDBResourceFileLocationDB">
+    <property name="bdbPath" value="${wayback.publicbasedir}/file-db/db/" />
+    <property name="bdbName" value="DB1" />
+    <property name="logPath" value="${wayback.publicbasedir}/file-db/db.log" />
+  </bean>
+
+  <!--
+    This example looks for ARC/WARC files recursively under 2 directories:
+      /tmp/wayback/files3 (CDN server archives) and /tmp/wayback/files5 (public archives)
+
+    You can specify as few or as many ResourceFileSource instances
+    as needed, but each must have a unique 'name' property.
+  -->
+
+  <bean id="publicdatadirs" class="org.springframework.beans.factory.config.ListFactoryBean">
+    <property name="sourceList">
+      <list>
+        <bean class="org.archive.wayback.resourcestore.resourcefile.DirectoryResourceFileSource">
+          <property name="name" value="files3" />
+          <property name="prefix" value="${wayback.archivedir.3}" />
+          <property name="recurse" value="true" />
+        </bean>
+        <bean class="org.archive.wayback.resourcestore.resourcefile.DirectoryResourceFileSource">
+          <property name="name" value="files5" />
+          <property name="prefix" value="${wayback.archivedir.5}" />
+          <property name="recurse" value="true" />
+        </bean>
+      </list>
+    </property>
+  </bean>
+
+<!--
+    A LocalResourceIndex bean using a BDBIndex SearchResultSource.
+    Not using the default basedir (for restricted access in "Lesesaal"), 
+    but a "publicbasedir" which will contain an index for public access.
+-->
+  <bean id="publicbdbresourceindex" parent="localbdbresourceindex">
+    <property name="source">
+      <bean class="org.archive.wayback.resourceindex.bdb.BDBIndex">
+        <property name="bdbName" value="DB1" />
+        <property name="bdbPath" value="${wayback.publicbasedir}/index/" />
+      </bean>
+    </property>
+  </bean>
+
+<!--
+    An IndexQueue implementation required for automatic indexing into the public index.
+   (Only archives which have been moved to the public collection will go here.)
+-->
+  <bean id="publicindexqueue" class="org.archive.wayback.resourcestore.indexer.DirectoryIndexQueue">
+    <property name="path" value="${wayback.publicbasedir}/index-data/queue" />
+  </bean>
+
+  <bean id="publicbdbcollection" class="org.archive.wayback.webapp.WaybackCollection">
+
+    <property name="resourceStore">
+      <bean id="publicresourcestore" class="org.archive.wayback.resourcestore.LocationDBResourceStore">
+        <property name="db" ref="publicresourcefilelocationdb" />
+      </bean>
+    </property>
+
+    <property name="resourceIndex" ref="publicbdbresourceindex"/>
+
+    <property name="shutdownables">
+      <list>
+         <!-- This thread notices new files appearing in your resourcefilesources -->
+         <bean id="publicresourcefilesourceupdater" class="org.archive.wayback.resourcestore.resourcefile.ResourceFileSourceUpdater">
+          <property name="target" value="${wayback.publicbasedir}/file-db/incoming" />
+          <property name="interval" value="100000" />
+          <property name="sources" ref="publicdatadirs" />
+        </bean>
+      
+        <!-- This thread updates the location db with updates from resourcefilesourceupdater -->
+        <bean id="publicresourcefilelocationdbupdater" class="org.archive.wayback.resourcestore.locationdb.ResourceFileLocationDBUpdater">
+          <property name="interval" value="1000" />
+          <property name="db" ref="publicresourcefilelocationdb" />
+          <property name="incomingDir" value="${wayback.publicbasedir}/file-db/incoming" />
+          <property name="stateDir" value="${wayback.publicbasedir}/file-db/state" />
+        </bean>
+        
+        <!-- This thread notices new files arriving in the filelocationdb, and queues them for indexing -->
+        <bean id="publicindexqueueupdater" class="org.archive.wayback.resourcestore.indexer.IndexQueueUpdater">
+          <property name="db" ref="publicresourcefilelocationdb" />
+          <property name="queue" ref="publicindexqueue" />
+          <property name="interval" value="1000" />
+          <property name="lastMark" value="${wayback.publicbasedir}/index-data/queue.mark" />
+        </bean>
+      
+        <!-- This thread checks the to-be-indexed queue for files needing indexing, indexes them, and hands off the results for merging with the ResourceIndex -->
+        <bean id="publicindexworker" class="org.archive.wayback.resourcestore.indexer.IndexWorker">
+          <property name="db" ref="publicresourcefilelocationdb" />
+          <property name="queue" ref="publicindexqueue" />
+          <property name="interval" value="1000" />
+          <property name="target">
+            <bean class="org.archive.wayback.resourceindex.updater.IndexClient">
+              <property name="tmpDir" value="${wayback.publicbasedir}/index-data/tmp/" />
+              <property name="target" value="${wayback.publicbasedir}/index-data/incoming/" />
+            </bean>
+          </property>
+          <property name="canonicalizer" ref="waybackCanonicalizer"/>
+        </bean>
+        
+        <!-- This thread merges updates from the indexworker into the ResourceIndex -->
+        <bean class="org.archive.wayback.resourceindex.updater.LocalResourceIndexUpdater">
+
+          <property name="index" ref="publicbdbresourceindex" />
+          <property name="incoming" value="${wayback.publicbasedir}/index-data/incoming/" />
+          <property name="failed" value="${wayback.publicbasedir}/index-data/failed/" />
+          <property name="merged" value="${wayback.publicbasedir}/index-data/merged/" />
+          <property name="runInterval" value="1000" />
+        </bean>
+      </list>
+    </property>
+  </bean>
+
+</beans>

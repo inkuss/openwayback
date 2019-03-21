@@ -7,8 +7,9 @@
 
 <!--
 
-    This file contains the default WaybackCollection implementation shipped
-    with Wayback. It consists of a LocalResourceIndex using a BDBIndex, and
+    This file contains the WaybackCollection implementation for HBZ Edoweb restricted access
+    ("Lesesaal")
+    It consists of a LocalResourceIndex using a BDBIndex, and
     uses several Worker Threads to implement automatic indexing.
     
     Several beans defined in this file reference the "resourcefilelocationdb"
@@ -27,16 +28,57 @@
 
 -->
 
+<!--
+	The ResourceFileLocationDB implementation to use for mapping ARC/WARC names
+	to absolute paths/URLs via a BDBJE database.
+-->
+  <bean id="resourcefilelocationdb" class="org.archive.wayback.resourcestore.locationdb.BDBResourceFileLocationDB">
+    <property name="bdbPath" value="${wayback.basedir}/file-db/db/" />
+    <property name="bdbName" value="DB1" />
+    <property name="logPath" value="${wayback.basedir}/file-db/db.log" />
+  </bean>
+
+<!--
+	The following bean provides an alternate flat-file based LocationDB
+	implementation.
+-->
+<!--
+  <bean id="resourcefilelocationdb" class="org.archive.wayback.resourcestore.locationdb.FlatFileResourceFileLocationDB">
+    <property name="path" value="${wayback.basedir}/path-index.txt" />
+  </bean>
+-->
+<!--
+    To enable manual management of, or remote access to the above locationDB,
+    uncomment the following bean.
+-->
+<!--
+  <bean name="8080:locationdb" class="org.archive.wayback.resourcestore.locationdb.ResourceFileLocationDBServlet">
+    <property name="locationDB" ref="resourcefilelocationdb" />
+  </bean>
+-->
+
+<!--
+	The FileProxyServlet uses a ResourceFileLocationDB to make all ARC/WARC 
+	files appear to reside within a single HTTP 1.1 exported directory.
+	Required when using the SimpleResourceStore to access distributed ARC/WARC
+	files over HTTP through a single reverse proxy.
+-->
+<!--
+  <bean name="8080:fileproxy" class="org.archive.wayback.resourcestore.locationdb.FileProxyServlet">
+    <property name="locationDB" ref="resourcefilelocationdb" />
+  </bean>
+-->
 
   <!--
-    This example looks for ARC/WARC files recursively under 2 directories:
-      /tmp/wayback/files1 and /tmp/wayback/files2
+    This example looks for ARC/WARC files recursively under 5 directories:
+      /tmp/wayback/files1 ... /tmp/wayback/files2
 
     You can specify as few or as many ResourceFileSource instances
     as needed, but each must have a unique 'name' property.
   -->
 
   <bean id="datadirs" class="org.springframework.beans.factory.config.ListFactoryBean">
+  <!-- Quellen für die Kollektion "Lesesaal" -->
     <property name="sourceList">
       <list>
         <bean class="org.archive.wayback.resourcestore.resourcefile.DirectoryResourceFileSource">
@@ -54,12 +96,23 @@
           <property name="prefix" value="${wayback.archivedir.3}" />
           <property name="recurse" value="true" />
         </bean>
+        <bean class="org.archive.wayback.resourcestore.resourcefile.DirectoryResourceFileSource">
+          <property name="name" value="files4" />
+          <property name="prefix" value="${wayback.archivedir.4}" />
+          <property name="recurse" value="true" />
+        </bean>
+        <bean class="org.archive.wayback.resourcestore.resourcefile.DirectoryResourceFileSource">
+          <property name="name" value="files5" />
+          <property name="prefix" value="${wayback.archivedir.5}" />
+          <property name="recurse" value="true" />
+        </bean>
       </list>
     </property>
   </bean>
 
 <!--
     A LocalResourceIndex bean using a BDBIndex SearchResultSource.
+    Creating an index for restricted access ("Lesesaal").
 -->
   <bean id="localbdbresourceindex" class="org.archive.wayback.resourceindex.LocalResourceIndex">
     <property name="canonicalizer" ref="waybackCanonicalizer" />
@@ -141,6 +194,5 @@
       </list>
     </property>
   </bean>
-
 
 </beans>

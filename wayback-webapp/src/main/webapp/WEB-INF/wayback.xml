@@ -7,21 +7,23 @@
 
 <!--
     Macro-like substitutions for the overall file:
-      wayback.basedir: default top level directory for all index, state, 
-		                 locationdb storage.
+      wayback.basedir:       default top level directory for all index, state, locationdb storage for the restricted access collection ("Lesesaal").
+      wayback.publicbasedir: default top level directory for all index, state, locationdb storage for the public  collection.
 -->
 
   <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
     <property name="properties">
       <value>
         <!-- Customize these basic placeholders. -->
-        wayback.basedir.default=/opt/regal/openwayback-data/openwayback
+        wayback.basedir.default=/opt/regal/openwayback-data/lesesaal
+        wayback.publicbasedir.default=/opt/regal/openwayback-data/public
         wayback.url.scheme.default=http
-        wayback.url.host.default=edoweb-test.hbz-nrw.de
+        wayback.url.host.default=edoweb-dev.hbz-nrw.de
         wayback.url.port.default=9080
 
         <!-- Environment variables (if present) override defaults. No need to customize these. -->
         wayback.basedir=#{ systemEnvironment['WAYBACK_BASEDIR'] ?: '${wayback.basedir.default}' }
+        wayback.publicbasedir=#{ systemEnvironment['WAYBACK_PUBLICBASEDIR'] ?: '${wayback.publicbasedir.default}' }
         wayback.url.scheme=#{ systemEnvironment['WAYBACK_URL_SCHEME'] ?: '${wayback.url.scheme.default}' }
         wayback.url.host=#{ systemEnvironment['WAYBACK_URL_HOST'] ?: '${wayback.url.host.default}' }
         wayback.url.port=#{ systemEnvironment['WAYBACK_URL_PORT'] ?: '${wayback.url.port.default}' }
@@ -41,60 +43,22 @@
         wayback.archivedir.2=/opt/regal/heritrix-data/
         wayback.archivedir.3=/opt/regal/cdn-data/
         wayback.archivedir.4=/opt/regal/wget-data/
-        wayback.archivedir.5=${wayback.basedir}/files2/
+        wayback.archivedir.5=/opt/regal/public-data/
       </value>
     </property>
   </bean>
 
   <bean id="waybackCanonicalizer" class="org.archive.wayback.util.url.AggressiveUrlCanonicalizer" />
 
-
 <!--
-	The ResourceFileLocationDB implementation to use for mapping ARC/WARC names
-	to absolute paths/URLs via a BDBJE database.
--->
-  <bean id="resourcefilelocationdb" class="org.archive.wayback.resourcestore.locationdb.BDBResourceFileLocationDB">
-    <property name="bdbPath" value="${wayback.basedir}/file-db/db/" />
-    <property name="bdbName" value="DB1" />
-    <property name="logPath" value="${wayback.basedir}/file-db/db.log" />
-  </bean>
-<!--
-	The following bean provides an alternate flat-file based LocationDB
-	implementation.
--->
-<!--
-  <bean id="resourcefilelocationdb" class="org.archive.wayback.resourcestore.locationdb.FlatFileResourceFileLocationDB">
-    <property name="path" value="${wayback.basedir}/path-index.txt" />
-  </bean>
--->
-<!--
-    To enable manual management of, or remote access to the above locationDB,
-    uncomment the following bean.
--->
-<!--
-  <bean name="8080:locationdb" class="org.archive.wayback.resourcestore.locationdb.ResourceFileLocationDBServlet">
-    <property name="locationDB" ref="resourcefilelocationdb" />
-  </bean>
--->
-
-<!--
-	The FileProxyServlet uses a ResourceFileLocationDB to make all ARC/WARC 
-	files appear to reside within a single HTTP 1.1 exported directory.
-	Required when using the SimpleResourceStore to access distributed ARC/WARC
-	files over HTTP through a single reverse proxy.
--->
-<!--
-  <bean name="8080:fileproxy" class="org.archive.wayback.resourcestore.locationdb.FileProxyServlet">
-    <property name="locationDB" ref="resourcefilelocationdb" />
-  </bean>
--->
-
-<!--
-	The XML files indicated in the following import tags contain alternate 
-	example implementations of WaybackCollections. To specify where your 
-	ARC/WARC files are located, see the file BDBCollection.xml.
+	The XML files indicated in the following import tags contain implementations of WaybackCollections. 
+        BDBCollection.xml is the standard wayback collection, used for restricted access material ("Lesesaal") in the HBZ Edoweb implementation.
+        BDBCollectionPublic.xml is an additional wayback collection for HBZ Edoweb which is used for public access archives only.
+ 
+        The order of imports must not be changed.
 -->
   <import resource="BDBCollection.xml"/>
+  <import resource="BDBCollectionPublic.xml"/>
 
 <!--
 
@@ -176,8 +140,9 @@
     <property name="useCollection" value="true" />
   </bean>
 
+  <!-- the standard access point is used for restricted access ("Lesesaal") -->  
   <bean name="standardaccesspoint" class="org.archive.wayback.webapp.AccessPoint">
-    <property name="accessPointPath" value="${wayback.url.prefix}/wayback/"/>
+    <property name="accessPointPath" value="${wayback.url.prefix}/lesesaal/"/>
     <property name="internalPort" value="${wayback.url.port}"/>
     <property name="serveStatic" value="true" />
     <property name="bounceToReplayPrefix" value="false" />
@@ -189,9 +154,9 @@
 	  requests by different URL prefixes
 	-->
 	
-    <property name="replayPrefix" value="${wayback.url.prefix}/wayback/" />
-    <property name="queryPrefix" value="${wayback.url.prefix}/wayback/" />
-    <property name="staticPrefix" value="${wayback.url.prefix}/wayback/" />
+    <property name="replayPrefix" value="${wayback.url.prefix}/lesesaal/" />
+    <property name="queryPrefix" value="${wayback.url.prefix}/lesesaal/" />
+    <property name="staticPrefix" value="${wayback.url.prefix}/lesesaal/" />
 
 	<!--
 		The following property will cause only results matching the exact host
@@ -221,7 +186,7 @@
 
     <property name="uriConverter">
       <bean class="org.archive.wayback.archivalurl.ArchivalUrlResultURIConverter">
-        <property name="replayURIPrefix" value="${wayback.url.prefix}/wayback/"/>
+        <property name="replayURIPrefix" value="${wayback.url.prefix}/lesesaal/"/>
       </bean>
     </property>
 
@@ -238,6 +203,32 @@
 <!-- See the LiveWeb.xml import above.
     <property name="exclusionFactory" ref="excluder-factory-static" />
 -->
+
+  </bean>
+
+  <!-- the public access point is used for material accessible by the public -->
+  <bean name="publicaccesspoint" parent="standardaccesspoint">
+    <property name="accessPointPath" value="${wayback.url.prefix}/public/"/>
+
+	<!--
+	  These properties enable customized handling of query, replay, and static
+	  requests by different URL prefixes
+	-->
+	
+    <property name="replayPrefix" value="${wayback.url.prefix}/public/" />
+    <property name="queryPrefix" value="${wayback.url.prefix}/public/" />
+    <property name="staticPrefix" value="${wayback.url.prefix}/public/" />
+
+    <property name="collection" ref="publicbdbcollection" />
+<!--    
+    <property name="collection" ref="localcdxcollection" />
+-->
+
+    <property name="uriConverter">
+      <bean class="org.archive.wayback.archivalurl.ArchivalUrlResultURIConverter">
+        <property name="replayURIPrefix" value="${wayback.url.prefix}/public/"/>
+      </bean>
+    </property>
 
   </bean>
 
