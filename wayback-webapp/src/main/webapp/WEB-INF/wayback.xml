@@ -204,11 +204,29 @@
     <property name="exclusionFactory" ref="excluder-factory-static" />
 -->
 
+<!--
+    Only allow access from the specified IP network ("Lesesaal").
+-->
+    <property name="authentication">
+      <bean class="org.archive.wayback.authenticationcontrol.IPMatchesBooleanOperator">
+        <property name="allowedRanges">
+          <list>
+            <value>9.9.9.9/24</value>
+          </list>
+        </property>
+      </bean>
+    </property>
+
   </bean>
 
   <!-- the public access point is used for material accessible by the public -->
-  <bean name="publicaccesspoint" parent="standardaccesspoint">
+  <bean name="publicaccesspoint" class="org.archive.wayback.webapp.AccessPoint">
     <property name="accessPointPath" value="${wayback.url.prefix}/public/"/>
+    <property name="internalPort" value="${wayback.url.port}"/>
+    <property name="serveStatic" value="true" />
+    <property name="bounceToReplayPrefix" value="false" />
+    <property name="bounceToQueryPrefix" value="false" />
+    <property name="enableMemento" value="true" />
 
 	<!--
 	  These properties enable customized handling of query, replay, and static
@@ -220,13 +238,31 @@
     <property name="staticPrefix" value="${wayback.url.prefix}/public/" />
 
     <property name="collection" ref="publicbdbcollection" />
-<!--    
-    <property name="collection" ref="localcdxcollection" />
+
+    <property name="replay" ref="archivalurlreplay" />
+    <property name="query">
+      <bean class="org.archive.wayback.query.Renderer">
+        <property name="captureJsp" value="/WEB-INF/query/CalendarResults.jsp" />
+<!--
+        This .jsp provides a "search engine" style listing of results vertically
+        <property name="captureJsp" value="/WEB-INF/query/HTMLCaptureResults.jsp" />
 -->
+      </bean>
+    </property>
 
     <property name="uriConverter">
       <bean class="org.archive.wayback.archivalurl.ArchivalUrlResultURIConverter">
         <property name="replayURIPrefix" value="${wayback.url.prefix}/public/"/>
+      </bean>
+    </property>
+
+    <property name="parser">
+      <bean class="org.archive.wayback.archivalurl.ArchivalUrlRequestParser">
+        <property name="maxRecords" value="10000" />
+        <!--
+        <property name="earliestTimestamp" value="1999" />
+        <property name="latestTimestamp" value="2004" />
+        -->
       </bean>
     </property>
 
