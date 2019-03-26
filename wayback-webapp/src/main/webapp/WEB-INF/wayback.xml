@@ -16,7 +16,7 @@
       <value>
         <!-- Customize these basic placeholders. -->
         wayback.basedir.default=/opt/regal/openwayback-data/lesesaal
-        wayback.publicbasedir.default=/opt/regal/openwayback-data/public
+        wayback.publicbasedir.default=/opt/regal/openwayback-data/weltweit
         wayback.url.scheme.default=http
         wayback.url.host.default=edoweb-dev.hbz-nrw.de
         wayback.url.port.default=9080
@@ -221,7 +221,7 @@
 
   <!-- the public access point is used for material accessible by the public -->
   <bean name="publicaccesspoint" class="org.archive.wayback.webapp.AccessPoint">
-    <property name="accessPointPath" value="${wayback.url.prefix}/public/"/>
+    <property name="accessPointPath" value="${wayback.url.prefix}/weltweit/"/>
     <property name="internalPort" value="${wayback.url.port}"/>
     <property name="serveStatic" value="true" />
     <property name="bounceToReplayPrefix" value="false" />
@@ -233,9 +233,9 @@
 	  requests by different URL prefixes
 	-->
 	
-    <property name="replayPrefix" value="${wayback.url.prefix}/public/" />
-    <property name="queryPrefix" value="${wayback.url.prefix}/public/" />
-    <property name="staticPrefix" value="${wayback.url.prefix}/public/" />
+    <property name="replayPrefix" value="${wayback.url.prefix}/weltweit/" />
+    <property name="queryPrefix" value="${wayback.url.prefix}/weltweit/" />
+    <property name="staticPrefix" value="${wayback.url.prefix}/weltweit/" />
 
     <property name="collection" ref="publicbdbcollection" />
 
@@ -252,7 +252,7 @@
 
     <property name="uriConverter">
       <bean class="org.archive.wayback.archivalurl.ArchivalUrlResultURIConverter">
-        <property name="replayURIPrefix" value="${wayback.url.prefix}/public/"/>
+        <property name="replayURIPrefix" value="${wayback.url.prefix}/weltweit/"/>
       </bean>
     </property>
 
