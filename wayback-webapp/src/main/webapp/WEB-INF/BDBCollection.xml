@@ -101,11 +101,6 @@
           <property name="prefix" value="${wayback.archivedir.4}" />
           <property name="recurse" value="true" />
         </bean>
-        <bean class="org.archive.wayback.resourcestore.resourcefile.DirectoryResourceFileSource">
-          <property name="name" value="files5" />
-          <property name="prefix" value="${wayback.archivedir.5}" />
-          <property name="recurse" value="true" />
-        </bean>
       </list>
     </property>
   </bean>
