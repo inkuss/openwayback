@@ -18,7 +18,7 @@
         wayback.basedir.default=/opt/regal/openwayback-data/lesesaal
         wayback.publicbasedir.default=/opt/regal/openwayback-data/weltweit
         wayback.url.scheme.default=http
-        wayback.url.host.default=edoweb-rlp.de
+        wayback.url.host.default=edoweb-dev.hbz-nrw.de
         wayback.url.port.default=9080
 
         <!-- Environment variables (if present) override defaults. No need to customize these. -->
@@ -42,7 +42,6 @@
         wayback.archivedir.1=/opt/regal/wpull-data/
         wayback.archivedir.2=/opt/regal/heritrix-data/
         wayback.archivedir.3=/opt/regal/cdn-data/
-        <!-- wget-data : migration data from edoweb2 -->
         wayback.archivedir.4=/opt/regal/wget-data/
         wayback.archivedir.5=/opt/regal/public-data/
       </value>
@@ -141,9 +140,9 @@
     <property name="useCollection" value="true" />
   </bean>
 
-  <!-- the standard access point is used for restricted access ("Lesesaal") -->
+  <!-- the standard access point is used for restricted access ("Lesesaal") -->  
   <bean name="standardaccesspoint" class="org.archive.wayback.webapp.AccessPoint">
-    <property name="accessPointPath" value="${wayback.url.prefix}/wayback/"/>
+    <property name="accessPointPath" value="${wayback.url.prefix}/lesesaal/"/>
     <property name="internalPort" value="${wayback.url.port}"/>
     <property name="serveStatic" value="true" />
     <property name="bounceToReplayPrefix" value="false" />
@@ -155,9 +154,9 @@
 	  requests by different URL prefixes
 	-->
 	
-    <property name="replayPrefix" value="${wayback.url.prefix}/wayback/" />
-    <property name="queryPrefix" value="${wayback.url.prefix}/wayback/" />
-    <property name="staticPrefix" value="${wayback.url.prefix}/wayback/" />
+    <property name="replayPrefix" value="${wayback.url.prefix}/lesesaal/" />
+    <property name="queryPrefix" value="${wayback.url.prefix}/lesesaal/" />
+    <property name="staticPrefix" value="${wayback.url.prefix}/lesesaal/" />
 
 	<!--
 		The following property will cause only results matching the exact host
@@ -187,7 +186,7 @@
 
     <property name="uriConverter">
       <bean class="org.archive.wayback.archivalurl.ArchivalUrlResultURIConverter">
-        <property name="replayURIPrefix" value="${wayback.url.prefix}/wayback/"/>
+        <property name="replayURIPrefix" value="${wayback.url.prefix}/lesesaal/"/>
       </bean>
     </property>
 
@@ -215,44 +214,6 @@
             <value>10.1.1.199</value><!-- mein Windows-PC -->
             <value>10.1.1.86</value><!-- Ingolfs Linux PC -->
             <value>10.1.2.38</value><!-- Peters PC -->
-            <value>193.30.112.89</value><!-- edoweb-test -->
-            <value>193.30.112.176</value><!-- edoweb-rlp.de -->
-            <value>193.30.112.177</value><!-- edoweb-dev -->
-            <value>141.26.254</value>
-            <value>141.26.253</value>
-            <value>80.153.33.115</value>
-            <value>143.93.253.98</value>
-            <value>217.198.244.65</value>
-            <value>217.198.244.66</value>
-            <value>217.198.244.67</value>
-            <value>217.198.244.68</value>
-            <value>217.198.244.69</value>
-            <value>217.198.244.70</value>
-            <value>217.198.244.71</value>
-            <value>217.198.244.72</value>
-            <value>217.198.244.73</value>
-            <value>217.198.244.74</value>
-            <value>217.198.244.75</value>
-            <value>217.198.244.76</value>
-            <value>217.198.244.77</value>
-            <value>217.198.244.78</value>
-            <value>217.198.244.79</value>
-            <value>217.198.244.80</value>
-            <value>217.198.244.81</value>
-            <value>217.198.244.82</value>
-            <value>217.198.244.83</value>
-            <value>217.198.244.84</value>
-            <value>217.198.244.85</value>
-            <value>217.198.244.86</value>
-            <value>217.198.244.87</value>
-            <value>217.198.244.88</value>
-            <value>217.198.244.89</value>
-            <value>217.198.244.90</value>
-            <value>217.198.244.91</value>
-            <value>217.198.244.92</value>
-            <value>217.198.244.93</value>
-            <value>217.198.244.94</value>
-            <value>217.198.244.95</value>
           </list>
         </property>
       </bean>
@@ -273,7 +234,7 @@
 	  These properties enable customized handling of query, replay, and static
 	  requests by different URL prefixes
 	-->
-
+	
     <property name="replayPrefix" value="${wayback.url.prefix}/weltweit/" />
     <property name="queryPrefix" value="${wayback.url.prefix}/weltweit/" />
     <property name="staticPrefix" value="${wayback.url.prefix}/weltweit/" />
