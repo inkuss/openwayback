@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans-3.0.xsd"
+       default-init-method="init">
+
+<!--
+
+    This file contains the WaybackCollection implementation for HBZ Edoweb restricted access
+    ("Lesesaal") in an alternative database index used for backup and recovery.
+    It consists of a LocalResourceIndex using a BDBIndex, and
+    uses several Worker Threads to implement automatic indexing.
+    
+    Several beans defined in this file reference the "resourcefilelocationdb"
+    bean defined in wayback.xml.
+
+    To customize where the automatic indexing system looks for ARC/WARC files,
+    edit the "datadirs" list below.
+
+    To customize the location where the automatic indexing state data is stored
+    you can modify "wayback.alternatebasedir" in wayback.xml, or replace the properties
+    in this file for further flexibility.
+
+    For more information about the auto-indexing system, please see:
+
+    http://archive-access.sourceforge.net/projects/wayback/resource_store.html
+
+-->
+
+<!--
+	The ResourceFileLocationDB implementation to use for mapping ARC/WARC names
+	to absolute paths/URLs via a BDBJE database.
+-->
+  <bean id="alternateresourcefilelocationdb" class="org.archive.wayback.resourcestore.locationdb.BDBResourceFileLocationDB">
+    <property name="bdbPath" value="${wayback.alternatebasedir}/file-db/db/" />
+    <property name="bdbName" value="DB1" />
+    <property name="logPath" value="${wayback.alternatebasedir}/file-db/db.log" />
+  </bean>
+
+<!--
+	The following bean provides an alternate flat-file based LocationDB
+	implementation.
+-->
+<!--
+  <bean id="resourcefilelocationdb" class="org.archive.wayback.resourcestore.locationdb.FlatFileResourceFileLocationDB">
+    <property name="path" value="${wayback.alternatebasedir}/path-index.txt" />
+  </bean>
+-->
+<!--
+    To enable manual management of, or remote access to the above locationDB,
+    uncomment the following bean.
+-->
+<!--
+  <bean name="8080:locationdb" class="org.archive.wayback.resourcestore.locationdb.ResourceFileLocationDBServlet">
+    <property name="locationDB" ref="resourcefilelocationdb" />
+  </bean>
+-->
+
+<!--
+	The FileProxyServlet uses a ResourceFileLocationDB to make all ARC/WARC 
+	files appear to reside within a single HTTP 1.1 exported directory.
+	Required when using the SimpleResourceStore to access distributed ARC/WARC
+	files over HTTP through a single reverse proxy.
+-->
+<!--
+  <bean name="8080:fileproxy" class="org.archive.wayback.resourcestore.locationdb.FileProxyServlet">
+    <property name="locationDB" ref="resourcefilelocationdb" />
+  </bean>
+-->
+
+  <!--
+    This example looks for ARC/WARC files recursively under 4 directories:
+      /tmp/wayback/files1 ... /tmp/wayback/files4
+
+    You can specify as few or as many ResourceFileSource instances
+    as needed, but each must have a unique 'name' property.
+  -->
+
+  <bean id="alternatedatadirs" class="org.springframework.beans.factory.config.ListFactoryBean">
+  <!-- Quellen für die Kollektion "Lesesaal" -->
+    <property name="sourceList">
+      <list>
+        <bean class="org.archive.wayback.resourcestore.resourcefile.DirectoryResourceFileSource">
+          <property name="name" value="files1" />
+          <property name="prefix" value="${wayback.archivedir.1}" />
+          <property name="recurse" value="true" />
+        </bean>
+        <bean class="org.archive.wayback.resourcestore.resourcefile.DirectoryResourceFileSource">
+          <property name="name" value="files2" />
+          <property name="prefix" value="${wayback.archivedir.2}" />
+          <property name="recurse" value="true" />
+        </bean>
+        <bean class="org.archive.wayback.resourcestore.resourcefile.DirectoryResourceFileSource">
+          <property name="name" value="files3" />
+          <property name="prefix" value="${wayback.archivedir.3}" />
+          <property name="recurse" value="true" />
+        </bean>
+        <bean class="org.archive.wayback.resourcestore.resourcefile.DirectoryResourceFileSource">
+          <property name="name" value="files4" />
+          <property name="prefix" value="${wayback.archivedir.4}" />
+          <property name="recurse" value="true" />
+        </bean>
+      </list>
+    </property>
+  </bean>
+
+<!--
+    A LocalResourceIndex bean using a BDBIndex SearchResultSource.
+    Creating an index for restricted access ("Lesesaal").
+-->
+  <bean id="alternatebdbresourceindex" parent="localbdbresourceindex">
+    <property name="source">
+      <bean class="org.archive.wayback.resourceindex.bdb.BDBIndex">
+        <property name="bdbName" value="DB1" />
+        <property name="bdbPath" value="${wayback.alternatebasedir}/index/" />
+      </bean>
+    </property>
+  </bean>
+
+<!--
+    An IndexQueue implementation required for automatic indexing.
+-->
+  <bean id="alternateindexqueue" class="org.archive.wayback.resourcestore.indexer.DirectoryIndexQueue">
+    <property name="path" value="${wayback.alternatebasedir}/index-data/queue" />
+  </bean>
+
+  <bean id="alternatebdbcollection" class="org.archive.wayback.webapp.WaybackCollection">
+
+    <property name="resourceStore">
+      <bean id="alternateresourcestore" class="org.archive.wayback.resourcestore.LocationDBResourceStore">
+        <property name="db" ref="alternateresourcefilelocationdb" />
+      </bean>
+    </property>
+
+    <property name="resourceIndex" ref="alternatebdbresourceindex"/>
+
+    <property name="shutdownables">
+      <list>
+         <!-- This thread notices new files appearing in your resourcefilesources -->
+         <bean class="org.archive.wayback.resourcestore.resourcefile.ResourceFileSourceUpdater">
+          <property name="target" value="${wayback.alternatebasedir}/file-db/incoming" />
+          <property name="interval" value="100000" />
+          <property name="sources" ref="alternatedatadirs" />
+        </bean>
+      
+        <!-- This thread updates the location db with updates from resourcefilesourceupdater -->
+        <bean class="org.archive.wayback.resourcestore.locationdb.ResourceFileLocationDBUpdater">
+          <property name="interval" value="1000" />
+          <property name="db" ref="alternateresourcefilelocationdb" />
+          <property name="incomingDir" value="${wayback.alternatebasedir}/file-db/incoming" />
+          <property name="stateDir" value="${wayback.alternatebasedir}/file-db/state" />
+        </bean>
+        
+        <!-- This thread notices new files arriving in the filelocationdb, and queues them for indexing -->
+        <bean class="org.archive.wayback.resourcestore.indexer.IndexQueueUpdater">
+          <property name="db" ref="alternateresourcefilelocationdb" />
+          <property name="queue" ref="alternateindexqueue" />
+          <property name="interval" value="1000" />
+          <property name="lastMark" value="${wayback.alternatebasedir}/index-data/queue.mark" />
+        </bean>
+      
+        <!-- This thread checks the to-be-indexed queue for files needing indexing, indexes them, and hands off the results for merging with the ResourceIndex -->
+        <bean class="org.archive.wayback.resourcestore.indexer.IndexWorker">
+          <property name="db" ref="alternateresourcefilelocationdb" />
+          <property name="queue" ref="alternateindexqueue" />
+          <property name="interval" value="1000" />
+          <property name="target">
+            <bean class="org.archive.wayback.resourceindex.updater.IndexClient">
+              <property name="tmpDir" value="${wayback.alternatebasedir}/index-data/tmp/" />
+              <property name="target" value="${wayback.alternatebasedir}/index-data/incoming/" />
+            </bean>
+          </property>
+          <property name="canonicalizer" ref="waybackCanonicalizer"/>
+        </bean>
+        
+        <!-- This thread merges updates from the indexworker into the ResourceIndex -->
+        <bean class="org.archive.wayback.resourceindex.updater.LocalResourceIndexUpdater">
+
+          <property name="index" ref="alternatebdbresourceindex" />
+          <property name="incoming" value="${wayback.alternatebasedir}/index-data/incoming/" />
+          <property name="failed" value="${wayback.alternatebasedir}/index-data/failed/" />
+          <property name="merged" value="${wayback.alternatebasedir}/index-data/merged/" />
+          <property name="runInterval" value="1000" />
+        </bean>
+      </list>
+    </property>
+
+  </bean>
+
+</beans>

@@ -16,6 +16,7 @@
       <value>
         <!-- Customize these basic placeholders. -->
         wayback.basedir.default=/opt/regal/openwayback-data/lesesaal
+        wayback.alternatebasedir.default=/opt/regal/openwayback-data/alternate
         wayback.publicbasedir.default=/opt/regal/openwayback-data/weltweit
         wayback.url.scheme.default=http
         wayback.url.host.default=edoweb-rlp.de
@@ -23,6 +24,7 @@
 
         <!-- Environment variables (if present) override defaults. No need to customize these. -->
         wayback.basedir=#{ systemEnvironment['WAYBACK_BASEDIR'] ?: '${wayback.basedir.default}' }
+        wayback.alternatebasedir=#{ systemEnvironment['WAYBACK_ALTERNATEBASEDIR'] ?: '${wayback.alternatebasedir.default}' }
         wayback.publicbasedir=#{ systemEnvironment['WAYBACK_PUBLICBASEDIR'] ?: '${wayback.publicbasedir.default}' }
         wayback.url.scheme=#{ systemEnvironment['WAYBACK_URL_SCHEME'] ?: '${wayback.url.scheme.default}' }
         wayback.url.host=#{ systemEnvironment['WAYBACK_URL_HOST'] ?: '${wayback.url.host.default}' }
@@ -59,6 +61,7 @@
         The order of imports must not be changed.
 -->
   <import resource="BDBCollection.xml"/>
+  <import resource="BDBCollectionAlternate.xml"/>
   <import resource="BDBCollectionPublic.xml"/>
 
 <!--
@@ -470,6 +473,8 @@
             <value>10.1.1.255</value>
             <value>10.1.2.19</value><!-- Andres' PC -->
             <value>10.1.2.38</value><!-- Peters PC -->
+            <value>10.10.0.2</value><!-- auch Andres' PC -->
+            <value>10.10.0.4</value><!-- Andres' PC -->
             <value>193.30.112.89</value><!-- edoweb-test -->
             <value>193.30.112.176</value><!-- edoweb-rlp.de -->
             <value>193.30.112.177</value><!-- edoweb-dev -->
