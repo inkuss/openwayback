@@ -69,7 +69,7 @@
     <security-constraint>
         <web-resource-collection>
             <web-resource-name>Secured-Wayback</web-resource-name>
-            <url-pattern>/usersecure/*</url-pattern>
+            <url-pattern>/lesesaal/*</url-pattern>
         </web-resource-collection>
         <auth-constraint>
             <role-name>wayback</role-name>
