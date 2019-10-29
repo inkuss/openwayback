@@ -18,7 +18,7 @@
         wayback.basedir.default=/opt/regal/openwayback-data/lesesaal_cdx
         wayback.publicbasedir.default=/opt/regal/openwayback-data/weltweit_cdx
         wayback.url.scheme.default=http
-        wayback.url.host.default=edoweb-dev.hbz-nrw.de
+        wayback.url.host.default=edoweb-rlp.de
         wayback.url.port.default=9080
 
         <!-- Environment variables (if present) override defaults. No need to customize these. -->
