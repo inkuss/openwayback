@@ -12,6 +12,7 @@ local.properties
 .classpath
 .settings/
 .loadpath
+wayback-webapp/src/main/webapp/WEB-INF/wayback.xml
 
 # Target
 target/
