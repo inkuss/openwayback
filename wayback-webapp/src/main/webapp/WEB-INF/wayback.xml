@@ -154,7 +154,7 @@
 
   <!-- the standard access point is used for restricted access ("Lesesaal") -->
   <bean name="standardaccesspoint" class="org.archive.wayback.webapp.AccessPoint">
-    <property name="accessPointPath" value="${wayback.url.prefix}/lesesaal/"/>
+    <property name="accessPointPath" value="${wayback.url.prefix}/wayback/"/>
     <property name="internalPort" value="${wayback.url.port}"/>
     <property name="serveStatic" value="true" />
     <property name="bounceToReplayPrefix" value="false" />
@@ -166,9 +166,9 @@
 	  requests by different URL prefixes
 	-->
 	
-    <property name="replayPrefix" value="${wayback.url.prefix}/lesesaal/" />
-    <property name="queryPrefix" value="${wayback.url.prefix}/lesesaal/" />
-    <property name="staticPrefix" value="${wayback.url.prefix}/lesesaal/" />
+    <property name="replayPrefix" value="${wayback.url.prefix}/wayback/" />
+    <property name="queryPrefix" value="${wayback.url.prefix}/wayback/" />
+    <property name="staticPrefix" value="${wayback.url.prefix}/wayback/" />
 
 	<!--
 		The following property will cause only results matching the exact host
@@ -196,7 +196,7 @@
 
     <property name="uriConverter">
       <bean class="org.archive.wayback.archivalurl.ArchivalUrlResultURIConverter">
-        <property name="replayURIPrefix" value="${wayback.url.prefix}/lesesaal/"/>
+        <property name="replayURIPrefix" value="${wayback.url.prefix}/wayback/"/>
       </bean>
     </property>
 
