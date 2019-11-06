@@ -15,10 +15,10 @@
     <property name="properties">
       <value>
         <!-- Customize these basic placeholders. -->
-        wayback.basedir.default=/opt/regal/openwayback-data/lesesaal_cdx
-        wayback.publicbasedir.default=/opt/regal/openwayback-data/weltweit_cdx
+        wayback.basedir.default=/opt/regal/openwayback-data/lesesaal
+        wayback.publicbasedir.default=/opt/regal/openwayback-data/weltweit
         wayback.url.scheme.default=http
-        wayback.url.host.default=edoweb-rlp.de
+        wayback.url.host.default=wayback2.hbz-nrw.de
         wayback.url.port.default=9080
 
         <!-- Environment variables (if present) override defaults. No need to customize these. -->
@@ -31,22 +31,18 @@
         <!-- No need to edit this setting unless deploying in a non-ROOT context
              or using a load balancer, in which case configure it with the frontend URL prefix. -->
         <!-- wayback.url.prefix.default=${wayback.url.scheme}://${wayback.url.host}:${wayback.url.port} -->
-	wayback.url.prefix.default=https://api.${wayback.url.host.default}
+	wayback.url.prefix.default=https://${wayback.url.host.default}
 
         <!-- Environment variable (if present) overrides default. No need to customize this. -->
         wayback.url.prefix=#{ systemEnvironment['WAYBACK_URL_PREFIX'] ?: '${wayback.url.prefix.default}' }
 
         <!-- Customize or add additional placeholders if needed to use elsewhere.
              Check BDBCollection.xml for following placeholders being used. -->
-        wayback.archivedir.1=/opt/regal/wpull-data/
-        wayback.archivedir.2=/opt/regal/heritrix-data/
-        wayback.archivedir.3=/opt/regal/cdn-data/
-        wayback.archivedir.4=/opt/regal/wget-data/
-        wayback.archivedir.5=/opt/regal/public-data/
-        <!-- wpull-data from /data of production -->
-	wayback.archivedir.6=/prod_data/wpull-data/
-        <!-- heritrix-data from /data of production -->
-	wayback.archivedir.7=/prod_data/heritrix-data/
+        wayback.archivedir.1=/data2/wpull-data/
+        wayback.archivedir.2=/data2/heritrix-data/
+        wayback.archivedir.3=/data2/cdn-data/
+        wayback.archivedir.4=/data2/wget-data/
+        wayback.archivedir.5=/data2/public-data/
       </value>
     </property>
   </bean>
@@ -154,7 +150,7 @@
 
   <!-- the standard access point is used for restricted access ("Lesesaal") -->
   <bean name="standardaccesspoint" class="org.archive.wayback.webapp.AccessPoint">
-    <property name="accessPointPath" value="${wayback.url.prefix}/wayback/"/>
+    <property name="accessPointPath" value="${wayback.url.prefix}/lesesaal/"/>
     <property name="internalPort" value="${wayback.url.port}"/>
     <property name="serveStatic" value="true" />
     <property name="bounceToReplayPrefix" value="false" />
@@ -166,9 +162,9 @@
 	  requests by different URL prefixes
 	-->
 	
-    <property name="replayPrefix" value="${wayback.url.prefix}/wayback/" />
-    <property name="queryPrefix" value="${wayback.url.prefix}/wayback/" />
-    <property name="staticPrefix" value="${wayback.url.prefix}/wayback/" />
+    <property name="replayPrefix" value="${wayback.url.prefix}/lesesaal/" />
+    <property name="queryPrefix" value="${wayback.url.prefix}/lesesaal/" />
+    <property name="staticPrefix" value="${wayback.url.prefix}/lesesaal/" />
 
 	<!--
 		The following property will cause only results matching the exact host
@@ -196,7 +192,7 @@
 
     <property name="uriConverter">
       <bean class="org.archive.wayback.archivalurl.ArchivalUrlResultURIConverter">
-        <property name="replayURIPrefix" value="${wayback.url.prefix}/wayback/"/>
+        <property name="replayURIPrefix" value="${wayback.url.prefix}/lesesaal/"/>
       </bean>
     </property>
 
