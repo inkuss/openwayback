@@ -30,8 +30,8 @@
 
         <!-- No need to edit this setting unless deploying in a non-ROOT context
              or using a load balancer, in which case configure it with the frontend URL prefix. -->
-        <!-- wayback.url.prefix.default=${wayback.url.scheme}://${wayback.url.host}:${wayback.url.port} -->
-	wayback.url.prefix.default=https://${wayback.url.host.default}
+        wayback.url.prefix.default=${wayback.url.scheme}://${wayback.url.host}:${wayback.url.port}
+	<!-- wayback.url.prefix.default=https://${wayback.url.host.default} -->
 
         <!-- Environment variable (if present) overrides default. No need to customize this. -->
         wayback.url.prefix=#{ systemEnvironment['WAYBACK_URL_PREFIX'] ?: '${wayback.url.prefix.default}' }
