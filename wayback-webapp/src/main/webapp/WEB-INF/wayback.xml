@@ -15,8 +15,8 @@
     <property name="properties">
       <value>
         <!-- Customize these basic placeholders. -->
-        wayback.basedir.default=/opt/regal/openwayback-data/lesesaal
-        wayback.publicbasedir.default=/opt/regal/openwayback-data/weltweit
+        wayback.basedir.default=/opt/wayback/openwayback-data/lesesaal
+        wayback.publicbasedir.default=/opt/wayback/openwayback-data/weltweit
         wayback.url.scheme.default=http
         wayback.url.host.default=wayback2.hbz-nrw.de
         wayback.url.port.default=9080
